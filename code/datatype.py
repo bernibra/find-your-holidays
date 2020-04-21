@@ -1,7 +1,7 @@
 import datetime, calendar
 
 #Global variable
-max_hours = 8
+max_hours = 8.2
 
 # Defining classes for days, months and year
 class day(object):

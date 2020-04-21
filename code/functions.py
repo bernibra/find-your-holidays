@@ -14,8 +14,16 @@ def read_holidays_google(file="../data/raw/holidays/holidays.csv"):
 
 def read_holidays_csv(file="../data/raw/holidays/holidays.csv"):
     # Read csv with public holidays
-    f = open("../data/raw/holidays/holidays.csv", "r+")
+    f = open(file, "r+")
     lines = [x.strip().split(",") for x in f.readlines()]
+    f.close()
+    return lines
+    
+def read_target(file="../data/raw/timesheet/targets.csv"):
+    # Read csv with public holidays
+    f = open(file, "r+")
+    lines = [x.strip().split(",") for x in f.readlines()]
+    lines = dict([(x[0], float(x[1])) for x in lines])
     f.close()
     return lines
 
@@ -24,19 +32,26 @@ def modify_xlsx(file="../data/raw/timesheet/ETH_Timesheet_2020_Bernat.xlsx"):
     pass
 
 def create_year(year=2020):
+    # Create year object
     data = datatype.year(2020)
     for i in range(1,13):
         data.add_month(i)
     
+    # Load essential data
     holidays = read_holidays_csv()
-    
+    target_ = read_target()
+
+    # Add public holidays
     for i in holidays:
         d, m, y = i[0].split(".")
         name = i[2]
-        hw = int(i[3])
+        hw = float(i[3])
         data.add_public_holiday(m = int(m), d = int(d), name = name, hours_worked = hw)
  
-    return data
+    for i in data.months:
+        target = dict([(data.months[i].name, round(data.months[i].max_hours(), 2)) for i in range(1,13)])
+     
+    return data, holidays
 
 
 """
