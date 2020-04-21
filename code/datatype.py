@@ -1,7 +1,7 @@
 import datetime, calendar
 
 #Global variable
-max_hours = 9
+max_hours = 8
 
 # Defining classes for days, months and year
 class day(object):
@@ -37,15 +37,26 @@ class month(object):
             self.days[datetime.date(self.year, self.id, d)].holiday = name
             self.days[datetime.date(self.year, self.id, d)].hworked = hours_worked
             self.days[datetime.date(self.year, self.id, d)].maxh = hours_worked
-        
-    def add_fake_holiday(self):
-        pass
+
+    def max_hours(self):
+        maxh = 0
+        for d in self.days:
+            maxh += self.days[d].maxh
+        return maxh
 
     def hours_worked(self):
         hworked = 0
         for d in self.days:
             hworked += self.days[d].hworked
         return hworked
+        
+    def __str__(self):
+        output = "\n" + " ".join(["day", "hours", "holiday"]) + "\n"
+        sorted_days = self.days.keys()
+        sorted_days.sort()
+        for d in sorted_days:
+            output += " ".join([str(d),str(self.days[d].hworked), str(self.days[d].public_holiday)]) + "\n"
+        return(output)
 
 class year(object):
     def __init__(self, y = None):
@@ -60,14 +71,22 @@ class year(object):
     def add_public_holiday(self, m, d, name = None, hours_worked=0):
         self.months[m].add_public_holiday(d, name=name, hours_worked=hours_worked)
         
-    def add_long_weekend(self, m, extra):
-        self.months[m].add_fake_holiday(d)
-        
-    def add_long_weekend(self, m, start, ndays, maxh):
-        self.months[m].add_fake_holiday(d)
-        
     def hours_worked(self):
         hworked = 0
         for m in self.months:
             hworked += self.months[m].hours_worked()
         return hworked
+
+    def max_hours(self):
+        maxh = 0
+        for m in self.months:
+            maxh += self.months[m].max_hours()
+        return maxh
+
+    def __str__(self):
+        output = "\n" + " ".join(["day", "hours", "holiday"]) + "\n"
+        sorted_days = self.days.keys()
+        sorted_days.sort()
+        for d in sorted_days:
+            output += " ".join([str(d),str(self.days[d].hworked), str(self.days[d].public_holiday)]) + "\n"
+        return(output)

@@ -2,7 +2,7 @@
 #from datetime import timedelta, datetime
 #import pytz, sys
 #import pandas as pd
-import datetime, calendar
+import datatype
 
 def add_holidays_google(file="../data/raw/holidays/holidays.csv"):
     # I should create api google calendar and a calendar to manage people's holidays. This function should add the public holidays from file "file". Then people should manually add holidays there using the right id or holiday "name".
@@ -14,14 +14,29 @@ def read_holidays_google(file="../data/raw/holidays/holidays.csv"):
 
 def read_holidays_csv(file="../data/raw/holidays/holidays.csv"):
     # Read csv with public holidays
-    pass
+    f = open("../data/raw/holidays/holidays.csv", "r+")
+    lines = [x.strip().split(",") for x in f.readlines()]
+    f.close()
+    return lines
 
 def modify_xlsx(file="../data/raw/timesheet/ETH_Timesheet_2020_Bernat.xlsx"):
     # I should create a function that takes the xlsx file and modify the right entry... but I think this is pretty fucking hard while mantaining the format... At the moment, I will skip this and only provide a csv file.
     pass
 
-def create_year(year):
-    pass
+def create_year(year=2020):
+    data = datatype.year(2020)
+    for i in range(1,13):
+        data.add_month(i)
+    
+    holidays = read_holidays_csv()
+    
+    for i in holidays:
+        d, m, y = i[0].split(".")
+        name = i[2]
+        hw = int(i[3])
+        data.add_public_holiday(m = int(m), d = int(d), name = name, hours_worked = hw)
+ 
+    return data
 
 
 """
