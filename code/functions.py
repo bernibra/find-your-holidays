@@ -3,6 +3,8 @@
 #import pytz, sys
 #import pandas as pd
 import datatype
+import pandas as pd
+
 
 def add_holidays_google(file="../data/raw/holidays/holidays.csv"):
     # I should create api google calendar and a calendar to manage people's holidays. This function should add the public holidays from file "file". Then people should manually add holidays there using the right id or holiday "name".
@@ -39,7 +41,7 @@ def create_year(year=2020):
     
     # Load essential data
     holidays = read_holidays_csv()
-    target_ = read_target()
+    #target_ = read_target()
 
     # Add public holidays
     for i in holidays:
@@ -51,9 +53,18 @@ def create_year(year=2020):
     for i in data.months:
         target = dict([(data.months[i].name, round(data.months[i].max_hours(), 2)) for i in range(1,13)])
      
-    return data, holidays
+    return data
 
-
+def generate_table_holidays(data):
+    sorted_days = data.days.keys()
+    sorted_days.sort()
+    results = []
+    for i in sorted_days:
+        if data.days[i].fake_holiday:
+            results += [i, "holiday"]
+        elif data.days[i].public_holiday:
+            results += [i, "public holiday"]
+    return results
 """
 # arguments
 input_file = sys.argv[1]

@@ -2,6 +2,7 @@ import datetime, calendar
 
 #Global variable
 max_hours = 8.2
+max_holidays = 25
 
 # Defining classes for days, months and year
 class day(object):
@@ -37,6 +38,12 @@ class month(object):
             self.days[datetime.date(self.year, self.id, d)].holiday = name
             self.days[datetime.date(self.year, self.id, d)].hworked = hours_worked
             self.days[datetime.date(self.year, self.id, d)].maxh = hours_worked
+            
+    def add_fake_holiday(self, d, name, hours_worked):
+        if not self.days[datetime.date(self.year, self.id, d)].weekend and not self.days[datetime.date(self.year, self.id, d)].public_holiday:
+            self.days[datetime.date(self.year, self.id, d)].fake_holiday = True
+            self.days[datetime.date(self.year, self.id, d)].hworked = 0
+            self.days[datetime.date(self.year, self.id, d)].maxh = hours_worked
 
     def max_hours(self):
         maxh = 0
@@ -71,6 +78,9 @@ class year(object):
     def add_public_holiday(self, m, d, name = None, hours_worked=0):
         self.months[m].add_public_holiday(d, name=name, hours_worked=hours_worked)
         
+    def add_fake_holiday(self, m, d, name = None, hours_worked=0):
+        self.months[m].add_fake_holiday(d, name=name, hours_worked=hours_worked)
+        
     def hours_worked(self):
         hworked = 0
         for m in self.months:
@@ -82,6 +92,13 @@ class year(object):
         for m in self.months:
             maxh += self.months[m].max_hours()
         return maxh
+        
+    def count_holidays_left(self):
+        counter = 0
+        for d in self.days:
+            if self.days[d].fake_holiday:
+                counter += 1
+        return max_holidays - counter
 
     def __str__(self):
         output = "\n" + " ".join(["day", "hours", "holiday"]) + "\n"
