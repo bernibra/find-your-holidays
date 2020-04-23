@@ -61,7 +61,7 @@ class month(object):
     def hours_worked(self):
         hworked = 0
         for d in self.days:
-            hworked += self.days[d].hworked
+            hworked += self.days[d].maxh
         return hworked
         
     def __str__(self):

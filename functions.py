@@ -9,22 +9,22 @@ import datetime, calendar
 
 
 
-def add_holidays_google(file="../data/raw/holidays/holidays.csv"):
+def add_holidays_google(file="./data/raw/holidays/holidays.csv"):
     # I should create api google calendar and a calendar to manage people's holidays. This function should add the public holidays from file "file". Then people should manually add holidays there using the right id or holiday "name".
     pass
 
-def read_holidays_google(file="../data/raw/holidays/holidays.csv"):
+def read_holidays_google(file="./data/raw/holidays/holidays.csv"):
     # I should create api google calendar and a calendar to manage people's holidays. This function should read the holidays from google calendars' api, including the public and personal holidays.
     pass
 
-def read_holidays_csv(file="../data/raw/holidays/holidays.csv"):
+def read_holidays_csv(file="./data/raw/holidays/holidays.csv"):
     # Read csv with public holidays
     f = open(file, "r+")
     lines = [x.strip().split(",") for x in f.readlines()]
     f.close()
     return lines
     
-def read_target(file="../data/raw/timesheet/targets.csv"):
+def read_target(file="./data/raw/timesheet/targets.csv"):
     # Read csv with public holidays
     f = open(file, "r+")
     lines = [x.strip().split(",") for x in f.readlines()]
@@ -32,7 +32,7 @@ def read_target(file="../data/raw/timesheet/targets.csv"):
     f.close()
     return lines
 
-def modify_xlsx(file="../data/raw/timesheet/ETH_Timesheet_2020_Bernat.xlsx"):
+def modify_xlsx(file="./data/raw/timesheet/ETH_Timesheet_2020_Bernat.xlsx"):
     # I should create a function that takes the xlsx file and modify the right entry... but I think this is pretty fucking hard while mantaining the format... At the moment, I will skip this and only provide a csv file.
     pass
 
@@ -70,7 +70,6 @@ def generate_table_holidays(data):
     return results
     
 def fill_work_hours(data, minh=4.1, maxh=9.2):
-    completed = True
     for i in data.months:
         for j in data.months[i].days:
             if not data.months[i].days[j].weekend and not data.months[i].days[j].fake_holiday:
@@ -84,7 +83,7 @@ def fill_work_hours(data, minh=4.1, maxh=9.2):
         for j in data.months[i].days.keys():
             target -= data.months[i].days[j].hworked
         
-        target = target - data.holiday_hours()
+        target = target - data.months[i].holiday_hours()
         N = len(data.months[i].days)-1
         j = 0
         k = 0
@@ -102,13 +101,11 @@ def fill_work_hours(data, minh=4.1, maxh=9.2):
                 if data.months[i].days[days[r]].hworked < maxh:
                     data.months[i].days[days[r]].hworked = round(data.months[i].days[days[r]].hworked + d,2)
                     j += 1
-        if j>=int(target/0.05):
-            completed = completed and True
-        else:
-            completed = completed and False
-    return data, completed
+                    
+    return data
 
 def generate_table_results(data):
+    data = fill_work_hours(data)
     k = data.year
     output = [",".join([",".join(["",data.months[x].name,"","",""]) for x in data.months])]
     output += [",".join([",".join(["date","h_worked","h_holidays","",""])]*len(data.months))]
@@ -129,7 +126,7 @@ def generate_table_results(data):
         for line in output:
             file.write(line)
             file.write('\n')"""
-    return output
+    return "\n".join(output)
 
 """
 # arguments

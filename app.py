@@ -6,19 +6,14 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import functions as fun
-import calmap
-import json
 import plotly
 import datetime
 import calendar
 import plotly.graph_objs as go
 import numpy as np
-from datetime import datetime as dt
-import dash
-import dash_html_components as html
-import dash_core_components as dcc
-import re
-import urllib
+
+from six.moves.urllib.parse import quote
+
 
 year = fun.create_year(year=2020)
 
@@ -137,7 +132,8 @@ app.layout = html.Div([
                                     min_date_allowed=min(year.days),
                                     max_date_allowed=max(year.days),
                                     initial_visible_month=min(year.days),
-                                    end_date=min(year.days),
+                                    start_date_placeholder_text="Start Period",
+                                    end_date_placeholder_text="End Period",
                                 ),
                                 html.Br(),
                                 html.Br(),
@@ -156,7 +152,7 @@ app.layout = html.Div([
                                      ),
                                      html.Div(
                                          [ html.Br(),
-                                           html.H6(id="worked"), html.P("Hours worked")],
+                                           html.H6(id="worked"), html.P("Hours Worked")],
                                          id="working",
                                          className="four columns",
                                      ),
@@ -165,10 +161,11 @@ app.layout = html.Div([
                                             html.Br(),
                                             html.Br(),
                                              html.A(
-                                                 html.Button("Download", id="download-link"),
-                                                 href="",
+                                                 html.Button("Download"),
+                                                 id='download-link',
                                                  download="rawdata.csv",
-                                                 target="_blank"
+                                                 href="",
+                                                 target="_blank",
                                              )
                                          ],
                                          className="one column",
@@ -208,7 +205,7 @@ def compute(n_clicks, start_date, end_date):
 
         for i in range(delta.days + 1):
             day = d1 + datetime.timedelta(days=i)
-            year.add_fake_holiday(m = day.month, d = day.day, name = "New", hours_worked = 0)
+            year.add_fake_holiday(m = day.month, d = day.day)
             
         return [dcc.Graph(id="heatmap-test", figure=holidays(year), config={"displayModeBar": False})]
         
@@ -231,20 +228,15 @@ def update_holidays_text(output):
             ],
         )
 def update_worked_text(output):
-    return str(year.hours_worked())
+    return str(year.hours_worked()-year.holiday_hours())
 
 @app.callback(
     dash.dependencies.Output('download-link', 'href'),
-    [dash.dependencies.Input("output", "children")])
-def update_download_link(filter_value):
-    year, completed = fun.fill_work_hours(year)
-    if completed:
-        csv_string = fun.generate_table_results(year)
-        csv_string = "data:text/csv;charset=utf-8," + urllib.quote(csv_string)
-        print csv_string
-        return csv_string
-    else:
-        return [html.P("Something went wrong")]
+    [dash.dependencies.Input('output', 'children')])
+def update_download_link(output):
+    csv_string = fun.generate_table_results(year)
+    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + quote(csv_string)
+    return csv_string
 
 
 if __name__ == '__main__':
