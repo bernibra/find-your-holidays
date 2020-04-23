@@ -14,9 +14,6 @@ import numpy as np
 
 from six.moves.urllib.parse import quote
 
-
-year = fun.create_year(year=2020)
-
 def discrete_colorscale(bvals, colors):
     """
     bvals - list of values bounding intervals/ranges of interest
@@ -130,9 +127,8 @@ app.layout = html.Div([
                                 html.Div(children='''What holidays will you take?'''),
                                 dcc.DatePickerRange(
                                     id='my-date-picker-range2',
-                                    min_date_allowed=min(year.days),
-                                    max_date_allowed=max(year.days),
-                                    initial_visible_month=min(year.days),
+                                    min_date_allowed=datetime.datetime(2020, 1, 1),
+                                    max_date_allowed=datetime.datetime(2020, 12, 31),
                                     start_date_placeholder_text="Start Period",
                                     end_date_placeholder_text="End Period",
                                 ),
@@ -184,62 +180,87 @@ app.layout = html.Div([
             html.Div(id='output'),
             html.Br(),
             html.Br(),
+            html.Div([], id='step_list', style={'display': 'none'})
 
             ], id="mainContainer", style={"margin-top": "40px", "margin-right": "40px", "margin-left": "40px", "margin-bottom": "40px", "padding":"60px"}, )
 ])
 
 
 @app.callback(
-    dash.dependencies.Output('output', 'children'),
+    [dash.dependencies.Output('output', 'children'),
+    dash.dependencies.Output('step_list', 'children')],
     [dash.dependencies.Input('button-2', 'n_clicks')],
-    state=[dash.dependencies.State('my-date-picker-range2', 'start_date'),
+    state=[dash.dependencies.State('step_list', 'children'), dash.dependencies.State('my-date-picker-range2', 'start_date'),
      dash.dependencies.State('my-date-picker-range2', 'end_date')])
-def compute(n_clicks, start_date, end_date):
+def compute(n_clicks, data, start_date, end_date):
+    year = fun.create_year(year=2020)
+
     if n_clicks is None or start_date is None or end_date is None:
-        return [dcc.Graph(id="heatmap-test", figure=holidays(year), config={"displayModeBar": False})]
+        return [dcc.Graph(id="heatmap-test", figure=holidays(year), config={"displayModeBar": False}), []]
     else:
         d1 = start_date.split("-")
         d2 = end_date.split("-")
         d1 = datetime.date(int(d1[0]), int(d1[1]), int(d1[2]))
         d2 = datetime.date(int(d2[0]), int(d2[1]), int(d2[2]))
         delta = d2 - d1       # as timedelta
+        
+        data = [datetime.datetime.strptime(i, "%Y-%m-%d").date() for i in data]
+        data = data + [d1 + datetime.timedelta(days=i) for i in range(delta.days + 1)]
+        for i in data:
+            year.add_fake_holiday(m = i.month, d = i.day)
+        
+        return [dcc.Graph(id="heatmap-test", figure=holidays(year), config={"displayModeBar": False}), data]
+        
 
-        for i in range(delta.days + 1):
-            day = d1 + datetime.timedelta(days=i)
-            year.add_fake_holiday(m = day.month, d = day.day)
-            
-        return [dcc.Graph(id="heatmap-test", figure=holidays(year), config={"displayModeBar": False})]
-        
-        
 # Selectors -> well text
 @app.callback(
     dash.dependencies.Output("holidays", "children"),
-            [
-                dash.dependencies.Input("output", "children"),
+    [dash.dependencies.Input('output', 'children')],
+            state = [
+                dash.dependencies.State('step_list', 'children'),
             ],
         )
-def update_holidays_text(output):
+def update_holidays_text(output, data):
+    year = fun.create_year(year=2020)
+    data = [datetime.datetime.strptime(i, "%Y-%m-%d").date() for i in data]
+
+    for i in data:
+        year.add_fake_holiday(m = i.month, d = i.day)
     return str(year.count_holidays_left()) + " days"
 
 # Selectors -> well text
 @app.callback(
     dash.dependencies.Output("worked", "children"),
-            [
-                dash.dependencies.Input("output", "children"),
+            [dash.dependencies.Input('output', 'children')],
+            state = [
+                dash.dependencies.State('step_list', 'children'),
             ],
         )
-def update_worked_text(output):
+def update_worked_text(n_clicks, data):
+    year = fun.create_year(year=2020)
+    data = [datetime.datetime.strptime(i, "%Y-%m-%d").date() for i in data]
+
+    for i in data:
+        year.add_fake_holiday(m = i.month, d = i.day)
     return str(round(year.hours_worked()-year.holiday_hours(),2))
 
 @app.callback(
     dash.dependencies.Output('download-link', 'href'),
-    [dash.dependencies.Input('output', 'children')])
-def update_download_link(output):
+    [dash.dependencies.Input('output', 'children')],
+    state = [
+        dash.dependencies.State('step_list', 'children'),
+    ],)
+def update_download_link(n_clicks, data):
+    year = fun.create_year(year=2020)
+    data = [datetime.datetime.strptime(i, "%Y-%m-%d").date() for i in data]
+
+    for i in data:
+        year.add_fake_holiday(m = i.month, d = i.day)
     csv_string = fun.generate_table_results(year)
     csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + quote(csv_string)
     return csv_string
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True,port=8000, host='127.0.0.1')
 
