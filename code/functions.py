@@ -4,6 +4,9 @@
 #import pandas as pd
 import datatype
 import pandas as pd
+import random
+import datetime, calendar
+
 
 
 def add_holidays_google(file="../data/raw/holidays/holidays.csv"):
@@ -65,6 +68,69 @@ def generate_table_holidays(data):
         elif data.days[i].public_holiday:
             results += [i, "public holiday"]
     return results
+    
+def fill_work_hours(data, minh=4.1, maxh=9.2):
+    completed = True
+    for i in data.months:
+        for j in data.months[i].days:
+            if not data.months[i].days[j].weekend and not data.months[i].days[j].fake_holiday:
+                if minh<=data.months[i].days[j].maxh:
+                    data.months[i].days[j].hworked = round(minh,2)
+                else:
+                    data.months[i].days[j].hworked = round(data.months[i].days[j].maxh,2)
+    for i in data.months:
+        days = data.months[i].days.keys()
+        target = round(data.months[i].max_hours(), 2)
+        for j in data.months[i].days.keys():
+            target -= data.months[i].days[j].hworked
+        
+        target = target - data.holiday_hours()
+        N = len(data.months[i].days)-1
+        j = 0
+        k = 0
+        d = float(0.05)
+        max_k = int(target/0.05)*100
+        while j < int(target/0.05) and k<max_k:
+            r = random.randint(0, N)
+            k += 1
+            if data.months[i].days[days[r]].fake_holiday:
+                continue
+            if data.months[i].days[days[r]].public_holiday and data.months[i].days[days[r]].hworked < data.months[i].days[days[r]].maxh:
+                data.months[i].days[days[r]].hworked = round(data.months[i].days[days[r]].hworked + d,2)
+                j += 1
+            elif not data.months[i].days[days[r]].weekend and not data.months[i].days[days[r]].public_holiday:
+                if data.months[i].days[days[r]].hworked < maxh:
+                    data.months[i].days[days[r]].hworked = round(data.months[i].days[days[r]].hworked + d,2)
+                    j += 1
+        if j>=int(target/0.05):
+            completed = completed and True
+        else:
+            completed = completed and False
+    return data, completed
+
+def generate_table_results(data):
+    k = data.year
+    output = [",".join([",".join(["",data.months[x].name,"","",""]) for x in data.months])]
+    output += [",".join([",".join(["date","h_worked","h_holidays","",""])]*len(data.months))]
+    
+    for j in range(1, 32):
+        z = []
+        for i in range(1,13):
+            try:
+                day = datetime.date(k, i, j)
+                x = data.days[day]
+                z_ = ",".join([str(day),str(data.days[day].hworked),str(data.days[day].hholidays), "",""])
+            except ValueError:
+                z_ = ",".join(["","","","",""])
+            z += [z_]
+        output += [",".join(z)]
+        
+    """with open('./csvfile.csv','wb') as file:
+        for line in output:
+            file.write(line)
+            file.write('\n')"""
+    return output
+
 """
 # arguments
 input_file = sys.argv[1]

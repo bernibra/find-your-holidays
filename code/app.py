@@ -18,6 +18,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import re
+import urllib
 
 year = fun.create_year(year=2020)
 
@@ -77,7 +78,7 @@ def holidays(year):
             ygap=3, # and this is used to make the grid-like apperance
             showscale=True,
             colorscale=colorscale,
-            colorbar = dict(thickness=15,
+            colorbar = dict(thickness=15,  len=0.7,
                 tickvals=[0.5,1.5,2.5,3.5],
                 ticktext=["work", "public holiday", "holiday", "weekend"]),
             )
@@ -155,7 +156,7 @@ app.layout = html.Div([
                                      ),
                                      html.Div(
                                          [ html.Br(),
-                                           html.H6(id="worked"), html.P("Worked")],
+                                           html.H6(id="worked"), html.P("Hours worked")],
                                          id="working",
                                          className="four columns",
                                      ),
@@ -164,8 +165,10 @@ app.layout = html.Div([
                                             html.Br(),
                                             html.Br(),
                                              html.A(
-                                                 html.Button("Download", id="learn-more-button"),
-                                                 href="https://plot.ly/dash/pricing/",
+                                                 html.Button("Download", id="download-link"),
+                                                 href="",
+                                                 download="rawdata.csv",
+                                                 target="_blank"
                                              )
                                          ],
                                          className="one column",
@@ -184,7 +187,7 @@ app.layout = html.Div([
             html.Br(),
             html.Br(),
 
-            ], id="mainContainer", style={"margin-top": "25px", "margin-right": "25px", "margin-left": "25px", "margin-bottom": "25px", "padding":"20px"}, )
+            ], id="mainContainer", style={"margin-top": "40px", "margin-right": "40px", "margin-left": "40px", "margin-bottom": "40px", "padding":"60px"}, )
 ])
 
 
@@ -228,8 +231,20 @@ def update_holidays_text(output):
             ],
         )
 def update_worked_text(output):
-    return str(year.hours_worked()) + " hours"
+    return str(year.hours_worked())
 
+@app.callback(
+    dash.dependencies.Output('download-link', 'href'),
+    [dash.dependencies.Input("output", "children")])
+def update_download_link(filter_value):
+    year, completed = fun.fill_work_hours(year)
+    if completed:
+        csv_string = fun.generate_table_results(year)
+        csv_string = "data:text/csv;charset=utf-8," + urllib.quote(csv_string)
+        print csv_string
+        return csv_string
+    else:
+        return [html.P("Something went wrong")]
 
 
 if __name__ == '__main__':
