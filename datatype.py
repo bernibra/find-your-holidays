@@ -66,7 +66,7 @@ class month(object):
         
     def __str__(self):
         output = "\n" + " ".join(["day", "hours", "holiday"]) + "\n"
-        sorted_days = self.days.keys()
+        sorted_days = list(self.days.keys())
         sorted_days.sort()
         for d in sorted_days:
             output += " ".join([str(d),str(self.days[d].hworked), str(self.days[d].public_holiday)]) + "\n"
@@ -115,7 +115,7 @@ class year(object):
 
     def __str__(self):
         output = "\n" + " ".join(["day", "hours", "hholidays", "holiday", "weekend", "fake_holiday"]) + "\n"
-        sorted_days = self.days.keys()
+        sorted_days = list(self.days.keys())
         sorted_days.sort()
         for d in sorted_days:
             output += " ".join([str(d),str(self.days[d].hworked), str(self.days[d].hholidays), str(self.days[d].public_holiday), str(self.days[d].weekend), str(self.days[d].fake_holiday)]) + "\n"

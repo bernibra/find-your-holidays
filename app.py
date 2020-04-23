@@ -35,7 +35,7 @@ def discrete_colorscale(bvals, colors):
 
 def holidays(year):
 
-    sorted_days = year.days.keys()
+    sorted_days = list(year.days.keys())
     sorted_days.sort()
     z = []
     for x in sorted_days:
@@ -228,7 +228,7 @@ def update_holidays_text(output):
             ],
         )
 def update_worked_text(output):
-    return str(year.hours_worked()-year.holiday_hours())
+    return str(round(year.hours_worked()-year.holiday_hours(),2))
 
 @app.callback(
     dash.dependencies.Output('download-link', 'href'),

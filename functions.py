@@ -59,7 +59,7 @@ def create_year(year=2020):
     return data
 
 def generate_table_holidays(data):
-    sorted_days = data.days.keys()
+    sorted_days = list(data.days.keys())
     sorted_days.sort()
     results = []
     for i in sorted_days:
@@ -78,9 +78,9 @@ def fill_work_hours(data, minh=4.1, maxh=9.2):
                 else:
                     data.months[i].days[j].hworked = round(data.months[i].days[j].maxh,2)
     for i in data.months:
-        days = data.months[i].days.keys()
+        days = list(data.months[i].days.keys())
         target = round(data.months[i].max_hours(), 2)
-        for j in data.months[i].days.keys():
+        for j in list(data.months[i].days.keys()):
             target -= data.months[i].days[j].hworked
         
         target = target - data.months[i].holiday_hours()
