@@ -2,4 +2,4 @@
 *.pyc
 .env
 venv
-time-saving-sheet
+heroku-app
