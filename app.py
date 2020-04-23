@@ -117,6 +117,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+server = app.server
 
 app.layout = html.Div([
             html.Div([
@@ -240,4 +241,5 @@ def update_download_link(output):
 
 
 if __name__ == '__main__':
-    app.server.run(port=8000, host='127.0.0.1')
+    app.run_server(debug=True)
+
