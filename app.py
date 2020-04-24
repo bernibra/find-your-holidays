@@ -178,8 +178,6 @@ app.layout = html.Div([
             html.Hr(),
 
             html.Div(id='output'),
-            html.Br(),
-            html.Br(),
             html.Div([], id='step_list', style={'display': 'none'})
 
             ], id="mainContainer", style={"margin-top": "40px", "margin-right": "40px", "margin-left": "40px", "margin-bottom": "40px", "padding":"60px"}, )

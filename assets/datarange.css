@@ -1,3 +1,24 @@
 .DateRangePickerInput__withBorder{
    border: 0px solid #dbdbdb;
 }
+
+html{
+   background-color: #f2f2f2;
+}
+
+body {
+  background-color: #f2f2f2;
+  margin: 5%;
+}
+
+#mainContainer{
+  border-radius: 5px;
+  border: 1px;
+  background-color: white;
+  margin: 10px;
+  padding: 15px;
+  position: relative;
+  box-shadow: 2px 2px 2px lightgrey;
+}
+
+
