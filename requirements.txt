@@ -12,4 +12,4 @@ pandas==0.25.3
 plotly==4.6.0
 python-dateutil==2.8.0
 six==1.13.0
-urllib3==1.25.7
+urllib3==1.25.8
